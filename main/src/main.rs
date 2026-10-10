@@ -1,9 +1,9 @@
 use winit::application::ApplicationHandler;         // why so many imports
-use winit::event::WindowEvent;
+use winit::event::{ElementState, KeyEvent, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
+use winit::keyboard::KeyCode::Escape;
 use winit::window::{Window, WindowId};
-
-
+use winit::keyboard::{PhysicalKey};
 
 #[derive(Default)]
 struct App {        // add imports to this? idk
@@ -19,8 +19,11 @@ impl ApplicationHandler for App {
     // handle the window events such as Close, Mouse click
     fn window_event(&mut self, event_loop: &ActiveEventLoop, _id: WindowId, event: WindowEvent) {
         match event {
-            WindowEvent::CloseRequested => {
+            WindowEvent::CloseRequested | 
+            // Or pressing escape
+            WindowEvent::KeyboardInput {device_id: _, event: KeyEvent {physical_key: PhysicalKey::Code(Escape), state: ElementState::Pressed, repeat: false, ..}, .. }=> {
                 println!("The close button was pressed; stopping");
+
                 event_loop.exit();
             },
             WindowEvent::RedrawRequested => {
@@ -34,6 +37,7 @@ impl ApplicationHandler for App {
 }
 
 fn main() {
+    env_logger::init();
     let event_loop = EventLoop::new().unwrap();
 
     // I chose ControlFlow::Poll over ControlFlow::Wait cause im making a game 

@@ -1,6 +1,7 @@
-// Switched code to different files so its more clean
+// Moved code to different files so its more clean
 mod app;
 mod renderer;
+mod mesh;
 
 use app::App;
 use winit::{

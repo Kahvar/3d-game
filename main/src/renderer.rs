@@ -1,5 +1,6 @@
 use std::sync::Arc; // wgpu needs this so the window keeps alive
 use winit::window::Window;
+use crate::mesh::create_triangle_buffer;
 
 // gpu struct use pub to make it usable to other files as well
 pub struct WgpuState {

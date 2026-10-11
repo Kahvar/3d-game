@@ -2,6 +2,7 @@
 mod app;
 mod renderer;
 mod mesh;
+mod pipeline;
 
 use app::App;
 use winit::{

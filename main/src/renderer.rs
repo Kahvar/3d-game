@@ -1,5 +1,6 @@
 use std::sync::Arc; // wgpu needs this so the window keeps alive
 use winit::window::Window;
+use crate::pipeline::create_pipeline;
 use crate::mesh::create_triangle_buffer;
 
 // gpu struct use pub to make it usable to other files as well
@@ -8,6 +9,8 @@ pub struct WgpuState {
     device: wgpu::Device,
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
+    render_pipeline: wgpu::RenderPipeline,
+    vertex_buffer: wgpu::Buffer,
 }
 
 
@@ -33,6 +36,7 @@ impl WgpuState {
             .await
             .unwrap();
 
+
         // open the device and queue to gpu
         let (device, queue) = adapter
             .request_device(
@@ -47,8 +51,9 @@ impl WgpuState {
             )
             .await
             .unwrap();
-
         
+
+
         // ask the monitor what colors it supports and pass it to the adapter so it knows what colors it can use
         let surface_caps = surface.get_capabilities(&adapter);
         
@@ -59,6 +64,17 @@ impl WgpuState {
             .copied()
             .find(|f| f.is_srgb())
             .unwrap_or(surface_caps.formats[0]);
+
+        //upload the triangle vertices to gpu
+        let vertex_buffer = create_triangle_buffer(&device);
+
+        // load shader
+        let shader = device.create_shader_module(wgpu::include_wgsl!("shaders/shader.wgsl"));
+
+        // describe how each vertex is stored in memory
+        let render_pipeline = create_pipeline(&device, &shader, surface_format);
+
+
 
         // Picks the first alpha mode which is Auto which chooses either Opaque or Inherit 
         let alpha_mode = surface_caps.alpha_modes[0];
@@ -83,6 +99,8 @@ impl WgpuState {
             device,
             queue,
             config,
+            render_pipeline,
+            vertex_buffer,
         }
     }
 
@@ -116,7 +134,7 @@ impl WgpuState {
 
         {
             // Throw a space color paint bucket to the screen
-            let _render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("Render Pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                     view: &view,
@@ -132,6 +150,11 @@ impl WgpuState {
                 occlusion_query_set: None,
                 multiview_mask: None,
             });
+            render_pass.set_pipeline(&self.render_pipeline);
+
+            render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+
+            render_pass.draw(0..3, 0..1);
         }
 
         // Send the recorded commands trough a "conveyor belt" to the GPU

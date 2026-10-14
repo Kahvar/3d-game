@@ -7,11 +7,12 @@ struct VertexPayload {
 @vertex
 fn vs_main(
     @location(0) position: vec3<f32>,
+    @location(1) color: vec3<f32>,
 ) -> VertexPayload {
     var output: VertexPayload;
 
     output.position = vec4<f32>(position, 1.0);
-    output.color = vec3<f32>(1.0, 0.4, 0.1);
+    output.color = color; // use color from buffer
 
     return output;
 }

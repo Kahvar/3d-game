@@ -10,6 +10,7 @@ use wgpu::util::DeviceExt;
 #[derive(Clone, Copy, Debug, bytemuck::Pod, bytemuck::Zeroable)] 
 pub struct Vertex {
     pub position: [f32; 3], // position takes 3 floating point numbers
+    pub color: [f32; 3],
 }
 
 // const is a value that is created at a compile time and cannot be changed at runtime
@@ -17,12 +18,15 @@ pub struct Vertex {
 pub const TRIANGLE_VERTICES: &[Vertex] = & [
     Vertex {
         position: [-0.5, -0.5, 0.0],
+        color: [1.0, 0.0, 3.0]
     },
     Vertex {
         position: [-0.0, 0.5, 0.0],
+        color: [0.0, 2.0, 1.0]
     },
     Vertex {
         position: [0.5, -0.5, 0.0],
+        color: [4.0, 2.0, 0.0]
     }
 ];
 

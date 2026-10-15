@@ -1,7 +1,7 @@
 use std::sync::Arc; // wgpu needs this so the window keeps alive
 use winit::window::Window;
 use crate::pipeline::create_pipeline;
-use crate::mesh::create_triangle_buffer;
+use crate::mesh::{CUBE_INDICES, create_cube_buffer, create_index_buffer};
 
 // gpu struct use pub to make it usable to other files as well
 pub struct WgpuState {
@@ -11,6 +11,7 @@ pub struct WgpuState {
     config: wgpu::SurfaceConfiguration,
     render_pipeline: wgpu::RenderPipeline,
     vertex_buffer: wgpu::Buffer,
+    index_buffer: wgpu::Buffer,
 }
 
 
@@ -65,8 +66,11 @@ impl WgpuState {
             .find(|f| f.is_srgb())
             .unwrap_or(surface_caps.formats[0]);
 
-        //upload the triangle vertices to gpu
-        let vertex_buffer = create_triangle_buffer(&device);
+        //upload the cube vertices to gpu
+        let vertex_buffer = create_cube_buffer(&device);
+
+        // upload cube vertices to the gpu
+        let index_buffer = create_index_buffer(&device);
 
         // load shader
         let shader = device.create_shader_module(wgpu::include_wgsl!("shaders/shader.wgsl"));
@@ -101,6 +105,7 @@ impl WgpuState {
             config,
             render_pipeline,
             vertex_buffer,
+            index_buffer,
         }
     }
 
@@ -154,7 +159,9 @@ impl WgpuState {
 
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
 
-            render_pass.draw(0..3, 0..1);
+            render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+
+            render_pass.draw_indexed(0..CUBE_INDICES.len() as u32, 0, 0..1);
         }
 
         // Send the recorded commands trough a "conveyor belt" to the GPU

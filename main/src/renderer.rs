@@ -1,4 +1,5 @@
-use std::sync::Arc; // wgpu needs this so the window keeps alive
+use std::sync::Arc;
+// wgpu needs this so the window keeps alive
 use winit::window::Window;
 use crate::pipeline::create_pipeline;
 use crate::mesh::{CUBE_INDICES, create_cube_buffer, create_index_buffer};
@@ -12,6 +13,8 @@ pub struct WgpuState {
     render_pipeline: wgpu::RenderPipeline,
     vertex_buffer: wgpu::Buffer,
     index_buffer: wgpu::Buffer,
+    depth_texture: wgpu::Texture,
+    depth_view: wgpu::TextureView,
 }
 
 
@@ -66,6 +69,19 @@ impl WgpuState {
             .find(|f| f.is_srgb())
             .unwrap_or(surface_caps.formats[0]);
 
+        let depth_texture = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("Depth Texture"),
+            size: wgpu::Extent3d { width: size.width.max(1), height: size.height.max(1), depth_or_array_layers: 1 },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Depth32Float,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            view_formats: &[],
+        });
+
+        let depth_view = depth_texture.create_view(&wgpu::wgt::TextureViewDescriptor::default());
+
         //upload the cube vertices to gpu
         let vertex_buffer = create_cube_buffer(&device);
 
@@ -106,6 +122,8 @@ impl WgpuState {
             render_pipeline,
             vertex_buffer,
             index_buffer,
+            depth_texture,
+            depth_view,
         }
     }
 
@@ -150,7 +168,14 @@ impl WgpuState {
                     },
                     depth_slice: None, 
                 })],
-                depth_stencil_attachment: None, // 3D depth buffer comes here later
+                depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment { 
+                    view: &self.depth_view,
+                    depth_ops: Some(wgpu::Operations { 
+                        load: wgpu::LoadOp::Clear(1.0), 
+                        store: wgpu::StoreOp::Store 
+                        }), 
+                    stencil_ops: None 
+                }),
                 timestamp_writes: None,
                 occlusion_query_set: None,
                 multiview_mask: None,

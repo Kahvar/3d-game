@@ -19,11 +19,11 @@ pub const CUBE_VERTICES: &[Vertex] = & [
     Vertex { position: [ 1.0, -1.0,  1.0], color: [0.0, 1.0, 0.0] }, // Down right (GREEN)
     Vertex { position: [ 1.0,  1.0,  1.0], color: [0.0, 0.0, 1.0] }, // Up right (BLUE)
     Vertex { position: [-1.0,  1.0,  1.0], color: [1.0, 1.0, 0.0] }, // Up left (YELLOW)
-    // Takatahko (Z = -1.0)
-    Vertex { position: [-1.0, -1.0, -1.0], color: [1.0, 0.0, 1.0] }, // 4
-    Vertex { position: [ 1.0, -1.0, -1.0], color: [0.0, 1.0, 1.0] }, // 5
-    Vertex { position: [ 1.0,  1.0, -1.0], color: [1.0, 1.0, 1.0] }, // 6
-    Vertex { position: [-1.0,  1.0, -1.0], color: [0.0, 0.0, 0.0] }, // 7
+
+    Vertex { position: [-1.0, -1.0, -1.0], color: [1.0, 0.0, 1.0] }, 
+    Vertex { position: [ 1.0, -1.0, -1.0], color: [0.0, 1.0, 1.0] }, 
+    Vertex { position: [ 1.0,  1.0, -1.0], color: [1.0, 1.0, 1.0] }, 
+    Vertex { position: [-1.0,  1.0, -1.0], color: [0.0, 0.0, 0.0] }, 
 ];
 
 pub const CUBE_INDICES: &[u16] = & [
